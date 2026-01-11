@@ -101,3 +101,39 @@ int main(int argc, char **argv){
     printf("Saved to %s\n", outpath);
     return 0;
 }
+ Image *cur = img;
+    FilterNode *fn = head;
+    while(fn){
+        Image *nextimg = NULL;
+        switch(fn->type){
+            case F_CROP: {
+                int packed = fn->param_int;
+                int w = (packed >> 16) & 0xFFFF;
+                int h = packed & 0xFFFF;
+                nextimg = filter_crop(cur, w, h);
+                break;
+            }
+            case F_GS: nextimg = filter_gs(cur); break;
+            case F_NEG: nextimg = filter_neg(cur); break;
+            case F_SHARP: nextimg = filter_sharp(cur); break;
+            case F_EDGE: nextimg = filter_edge(cur, fn->param1); break;
+            case F_MED: nextimg = filter_med(cur, fn->param_int); break;
+            case F_BLUR: nextimg = filter_blur(cur, fn->param1); break;
+            case F_CRYS: nextimg = filter_crys(cur, fn->param_int); break;
+            case F_GLASS: nextimg = filter_glass(cur, fn->param_int); break;
+            default: break;
+        }
+        if(!nextimg){ fprintf(stderr,"Filter failed\n"); image_free(cur); return 1; }
+        if(cur != img) image_free(cur);
+        cur = nextimg;
+        fn = fn->next;
+    }
+    
+    if(!image_save_bmp(outpath, cur)){ fprintf(stderr,"Failed to save output\n"); image_free(cur); return 1; }
+    image_free(cur);
+    
+    fn = head;
+    while(fn){ FilterNode *tmp = fn->next; free(fn); fn = tmp; }
+    printf("Saved to %s\n", outpath);
+    return 0;
+}
