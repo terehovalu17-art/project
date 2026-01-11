@@ -7,7 +7,7 @@
 #include "filters.h"
 
 
-typedef enum {F_CROP, F_GS, F_NEG, F_SHARP} FType;
+typedef enum {F_CROP, F_GS, F_NEG, F_SHARP, F_EDGE, F_MED, F_BLUR, F_CRYS, F_GLASS} FType;
 typedef struct FilterNode {
     FType type;
     double param1;
